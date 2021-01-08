@@ -1,0 +1,9 @@
+# Version 1.0.1
+
+* small bug fix
+
+# Version 1.0.0
+
+* added shortcut that shows the management console
+* added a setting to toggle the top/left toolbar button (default off)
+
