@@ -120,7 +120,7 @@ end
 -- @param stop The stop to update
 --
 function dispatcher_update_stop_status(stop)
-  log("update status of stop "..stop.entity.backer_name)
+  --log("update status of stop "..stop.entity.backer_name)
 
   local params = {}
   local lampColor = nil
@@ -195,10 +195,9 @@ function dispatcher_train_waiting_station(train)
   log("stop "..stop.entity.backer_name.." is ready for delivery")
 
   local resource = get_or_create_resource(stop)
-  if #resource.pending > 0 then
+  if #resource.pending > 0 and dispatcher_train_schedule_delivery(stop, requester) then
     local requester = resource.pending[1]
     table.remove(resource.pending, 1)
-    dispatcher_train_schedule_delivery(stop, requester)
   else
     dispatcher_update_stop_status(stop)
   end
@@ -213,17 +212,22 @@ end
 -- @return True if the train is being sent, false if there was no train
 --
 function dispatcher_train_schedule_delivery(stop, requester)
-  stop.canDeliver = false
   local train = stop.entity.get_stopped_train()
   if not train then
     log("WARN no train found to deliver at stop "..stop.entity.backer_name)
+    stop.canDeliver = false
     return false
   end
 
   local targetStop = global.stops[requester.stopId]
+  if targetStop.entity.trains_count >= targetStop.entity.trains_limit then
+    --log("not sending delivery train to "..targetStop.entity.backer_name..", reason: stop's train limit reached")
+    return false
+  end
 
   log("sending delivery train from "..stop.entity.backer_name.." to "..targetStop.entity.backer_name)
   targetStop.deliveringTrains[train.id] = requester.resourceName
+  stop.canDeliver = false
 
   train_schedule_delivery(train, targetStop.entity.backer_name)
   dispatcher_update_stop_status(targetStop)
@@ -267,19 +271,22 @@ end
 -- @param requester The requester to handle
 --
 function dispatcher_request_delivery(requester)
-  log("requesting delivery for requester #"..requester.entityId)
-  requester.statusSince = game.tick
-  requester.trainRequested = true
-
   local resource = get_or_create_resource(requester)
-
   for _,stop in pairs(resource.stops) do
     if stop.canDeliver and dispatcher_train_schedule_delivery(stop, requester) then
+      log("requesting delivery for requester #"..requester.entityId..": "..requester.resourceName)
+      requester.statusSince = game.tick
+      requester.trainRequested = true
       return
     end
   end
 
-  log("no train ready for delivery to "..global.stops[requester.stopId].entity.backer_name..", waiting")
+  log("no train ready for delivery of "..resource.resourceName.." to "..global.stops[requester.stopId].entity.backer_name..", waiting")
+  for i,req in pairs(resource.pending) do
+    if req.entityId == requester.entityId then
+      return
+    end
+  end
   table.insert(resource.pending, requester)
 end
 
@@ -363,7 +370,7 @@ end
 
 --
 -- Handle requesters.
--- Called every couple of seconds.
+-- Called every couple of seconds or when a train finishes a delivery.
 --
 function dispatcher_handle_requesters()
   for _,requester in pairs(global.requesters) do

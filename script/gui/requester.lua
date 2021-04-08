@@ -24,32 +24,31 @@ end
 -- @param entityId The entity ID of the requester
 --
 function open_requester_dialog(player, entityId)
-  local flow = mod_gui.get_frame_flow(player)
-  local dialog = flow[REQUESTER_DIALOG_NAME]
-  
+  local dialog = player.gui.relative[REQUESTER_DIALOG_NAME]
   if dialog then
     dialog.destroy()
-    dialog = nil
   end
 
   local btnResource, btnNetwork
 
-  if dialog then
-    dialog.visible = true
-    btnResource = dialog["table"]["tm-requester-resource"]
-    btnNetwork = dialog["table"]["tm-requester-network"]
-  else
-    dialog = flow.add{ type = "frame", name = REQUESTER_DIALOG_NAME, direction = "vertical", caption = {"caption.requester"} }
-    local table = dialog.add{ name = "table", type = "table", column_count = 2 }
-    table.add{ type = "label", caption = {"label.requester_resource"}, tooltip = {"tooltip.requester_resource"} }
-    btnResource = table.add{ type = "choose-elem-button", name = "tm-requester-resource", elem_type = "signal" }
-    table.add{ type = "label", caption = {"label.requester_network"}, tooltip = {"tooltip.requester_network"} }
-    btnNetwork = table.add{ type = "choose-elem-button", name = "tm-requester-network", elem_type = "signal" }
-  end
+  dialog = player.gui.relative.add{type = "frame", name = REQUESTER_DIALOG_NAME, direction = "vertical",
+             anchor = {gui = defines.relative_gui_type.lamp_gui, position = defines.relative_gui_position.right},
+             caption = {"caption.requester-frame"}}
+  local table = dialog.add{ name = "table", type = "table", column_count = 2 }
+  table.add{ type = "label", caption = {"label.requester_resource"}, tooltip = {"tooltip.requester_resource"} }
+  btnResource = table.add{ type = "choose-elem-button", name = "tm-requester-resource", elem_type = "signal" }
+  table.add{ type = "label", caption = {"label.requester_network"}, tooltip = {"tooltip.requester_network"} }
+  btnNetwork = table.add{ type = "choose-elem-button", name = "tm-requester-network", elem_type = "signal" }
 
-  local config = global.requesters[entityId] or {}
-  btnResource.elem_value = strToSignalId(config.resourceName)
-  btnNetwork.elem_value = strToSignalId(config.networkName)
+  local requester = global.requesters[entityId] or {}
+  btnResource.elem_value = strToSignalId(requester.resourceName)
+  btnNetwork.elem_value = strToSignalId(requester.networkName)
+
+  local ctrl = requester.entity.get_control_behavior()
+  if not ctrl.get_circuit_network(defines.wire_type.red) and not ctrl.get_circuit_network(defines.wire_type.green) then
+    dialog.add{ type = "label", style = "tm-error-text", caption = {"message.requester-not-connected"},
+                tooltip = {"tooltip.requester-not-connected"},}
+  end
 
   global.dialogData[player.index] = { requesterEntityId = entityId }
 end

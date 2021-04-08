@@ -29,8 +29,7 @@ function update_dialog_tab_resources(parent)
 
   for _,resource in pairs(resources) do
     local surface = game.surfaces[resource.surfaceId] or {}
-    resource._label = signalIdToLocalName(strToSignalId(resource.resourceName))
-    log(serpent.line(resource._label))
+    resource._label = signalIdToLocalName(strToSignalId(resource.resourceName)) or {}
     resource._sort = (resource._label[1] or 'zzz')..'^'..(resource.networkName or 'zzz')..'^'..surface.name
   end
 

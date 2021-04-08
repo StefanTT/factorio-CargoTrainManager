@@ -28,6 +28,7 @@ function update_dialog_tab_pending(parent, player)
   for _,resource in pairs(resources) do
     for __,requester in pairs(resource.pending) do
       pending[#pending + 1] = requester
+      log("pending delivery: "..resource.resourceName.." / "..resource.networkName)
     end
   end
 
@@ -47,7 +48,7 @@ function update_dialog_tab_pending(parent, player)
     return pending[a]._sort > pending[b]._sort
   end
 
-  for _,requester in sorted_pairs(pending, comp) do
+  for idx,requester in sorted_pairs(pending, comp) do
     signal = strToSignalId(requester.resourceName)
     if signal then
       sprite = signalToSpritePath(signal)
@@ -88,7 +89,7 @@ function update_dialog_tab_pending(parent, player)
 
     if requester.entity.surface.index == playerSurfaceId then
       table.add{type = "sprite-button", sprite = "utility/center", style = "tool_button", tooltip = {"tooltip.show-on-map"},
-                name = BTN_SHOW_ON_MAP_PREFIX..requester.entity.position.x..":"..requester.entity.position.y}
+                name = BTN_SHOW_ON_MAP_PREFIX..requester.entity.position.x..":"..requester.entity.position.y..":"..idx}
     else
       table.add{type = "empty-widget"}
     end

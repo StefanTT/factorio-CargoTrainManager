@@ -15,8 +15,8 @@ function onRequesterCreated(entity, playerId)
   ctrl.use_colors = true
   ctrl.circuit_condition = {
     condition = {comparator = ">",
-      first_signal = {type="virtual", name = "signal-T"},
-      second_signal = {type="virtual", name = CTM_COUNTER_SIGNAL},
+      --first_signal = {type="virtual", name = "signal-T"},
+      constant = 0,
     }
   }
 

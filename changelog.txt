@@ -1,9 +1,35 @@
-# Version 1.0.1
-
-* small bug fix
-
-# Version 1.0.0
-
-* added shortcut that shows the management console
-* added a setting to toggle the top/left toolbar button (default off)
+---------------------------------------------------------------------------------------------------
+Version 1.0.4
+Date: 2021-04-08
+  New feature:
+    - Requester's logic condition can now be set to e.g. "iron-plate > 0" instead of
+      "iron-plate > number-of-incoming-trains". This allows multiple requests to be handled in
+      parallel. Use a station's train limit to control the maximum number of trains that are
+      being sent.
+    - Attached requester / station dialogs to the entities main dialog window.
+    - Show a warning message in the requester's GUI if the requester is not connected to
+      a logic network.
+  Bugfix:
+    - Ensure requests are not added multiple times as pending deliveries.
+    - Avoid crash when management console's pending deliveries tab is opened
+      while having an active unconfigured requester.
+---------------------------------------------------------------------------------------------------
+Version: 1.0.3
+Date: 2021-01-17
+  Bugfix:
+    - Fixed crash when opening the management console and a resource is unknown).
+---------------------------------------------------------------------------------------------------
+Version: 1.0.2
+Date: 2021-01-13
+  Bugfix:
+    - Fixed resource priority configuration dialog.
+---------------------------------------------------------------------------------------------------
+Version: 1.0.1
+  Bugfix:
+    - Small bug fix.
+---------------------------------------------------------------------------------------------------
+Version: 1.0.0
+  New features:
+    - Added shortcut that shows the management console.
+    - Added a setting to toggle the top/left toolbar button (default off).
 

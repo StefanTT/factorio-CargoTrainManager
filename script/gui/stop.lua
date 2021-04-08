@@ -10,7 +10,7 @@ mod_gui = require("mod-gui")
 -- @param player The player to close the dialog for
 -- 
 function close_stop_dialog(player)
-  local dialog = mod_gui.get_frame_flow(player)[STOP_DIALOG_NAME]
+  local dialog = player.gui.relative[STOP_DIALOG_NAME]
   if dialog then
     dialog.destroy()
   end
@@ -93,8 +93,11 @@ function open_stop_dialog(player, entityId)
   
   local lblResource, btnResource, btnNetwork
 
-  local flow = mod_gui.get_frame_flow(player)
-  local dialog = flow.add{ type = "frame", name = STOP_DIALOG_NAME, direction = "vertical" }
+--  local flow = mod_gui.get_frame_flow(player)
+--  local dialog = flow.add{ type = "frame", name = STOP_DIALOG_NAME, direction = "vertical" }
+
+  local dialog = player.gui.relative.add{type = "frame", name = STOP_DIALOG_NAME, direction = "vertical",
+                   anchor = {gui = defines.relative_gui_type.train_stop_gui, position = defines.relative_gui_position.left}}
 
   if stop.numRequesters and stop.numRequesters > 0 then
     open_requester_stop_dialog(entityId, stop, dialog)

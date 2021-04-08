@@ -66,6 +66,13 @@ for state, y in pairs(btnIconStatesTab) do
 end
 
 
+data.raw["gui-style"].default["tm-error-text"] = {
+  type = "label_style",
+  parent = "label",
+  font_color = {r=230, g=145, b=145}
+}
+
+
 data.raw["gui-style"].default["tm-label-right"] = {
   type = "label_style",
   parent = "label",
