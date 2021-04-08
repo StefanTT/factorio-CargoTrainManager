@@ -219,8 +219,8 @@ function dispatcher_train_schedule_delivery(stop, requester)
     return false
   end
 
-  local targetStop = global.stops[requester.stopId]
-  if targetStop.entity.trains_count >= targetStop.entity.trains_limit then
+  local targetStop = global.stops[requester.stopId or -1]
+  if not targetStop or targetStop.entity.trains_count >= targetStop.entity.trains_limit then
     --log("not sending delivery train to "..targetStop.entity.backer_name..", reason: stop's train limit reached")
     return false
   end

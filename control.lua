@@ -29,5 +29,6 @@ require "script.requester-events"
 require "script.train-events"
 require "script.events"
 
+require "script.migration"
 require "script.init"
 

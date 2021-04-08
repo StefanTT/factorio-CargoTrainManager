@@ -61,6 +61,9 @@ local function initGlobalVariables()
   -- Dialog private data per player.
   -- Key is the player number, value depends on the currently opened dialog.
   global.dialogData = global.dialogData or {}
+
+  -- The version of the mod's entities or data
+  global.version = global.version or 0
 end
 
 
@@ -91,11 +94,17 @@ end)
 -- Called any time the game version changes, prototypes change, startup mod settings change,
 -- and any time mod versions change including adding or removing mods.
 --
--- @param data The ConfigurationChangedData
+-- @param data The ConfigurationChangedData containing the following fields:
+--        old_version :: string (optional): Old version of the map. Present only when loading map version other than the current version.
+--        new_version :: string (optional): New version of the map. Present only when loading map version other than the current version.
+--        mod_changes :: dictionary string → ModConfigurationChangedData: Dictionary of mod changes. It is indexed by mod name.
+--        mod_startup_settings_changed :: boolean: True when mod startup settings have changed since the last time this save was loaded.
+--        migration_applied :: boolean: True when mod prototype migrations have been applied since the last time this save was loaded.
 --
 script.on_configuration_changed(function(data)
   log("configuration changed")
   initGlobalVariables()
+  global.version = migrateData(global.version)
   registerEvents()
   log("mod "..script.mod_name.." configuration updated")
 end)

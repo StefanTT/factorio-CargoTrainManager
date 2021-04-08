@@ -27,7 +27,7 @@ end
 --
 function signalIdToStr(id)
   if not id or not id.type then return nil end
-  return string.sub(id.type, 1, 1)..'-'..id.name
+  return string.sub(id.type, 1, 1)..'-'..(id.name or 'nil')
 end
 
 --

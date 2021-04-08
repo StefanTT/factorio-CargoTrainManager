@@ -1,4 +1,13 @@
 ---------------------------------------------------------------------------------------------------
+Version 1.0.5
+Date: 2021-04-08
+  New feature:
+    - Migrate existing requesters to new comparision logic introduced in 1.0.4 if
+      the condition is compatible. The train station's maximum number of trains is set
+      to 1 if it is unset (for the train stations with converted requesters).
+  Bugfix:
+    - Fixed exception when trying to schedule to a requester that has no stop.
+---------------------------------------------------------------------------------------------------
 Version 1.0.4
 Date: 2021-04-08
   New feature:

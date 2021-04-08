@@ -77,6 +77,7 @@ local function onShortcut(event)
   end
 end
 
+
 --
 -- Register the event callbacks.
 --
