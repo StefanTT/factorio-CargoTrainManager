@@ -195,8 +195,7 @@ function dispatcher_train_waiting_station(train)
   log("stop "..stop.entity.backer_name.." is ready for delivery")
 
   local resource = get_or_create_resource(stop)
-  if #resource.pending > 0 and dispatcher_train_schedule_delivery(stop, requester) then
-    local requester = resource.pending[1]
+  if #resource.pending > 0 and dispatcher_train_schedule_delivery(stop, resource.pending[1]) then
     table.remove(resource.pending, 1)
   else
     dispatcher_update_stop_status(stop)

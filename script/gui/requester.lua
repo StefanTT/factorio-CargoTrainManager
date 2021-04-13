@@ -10,9 +10,9 @@ mod_gui = require("mod-gui")
 -- @param player The player to close the dialog for
 -- 
 function close_requester_dialog(player)
-  local dialog = mod_gui.get_frame_flow(player)[REQUESTER_DIALOG_NAME]
+  local dialog = player.gui.relative[REQUESTER_DIALOG_NAME]
   if dialog then
-    dialog.visible = false
+    dialog.destroy()
   end
 end
 
@@ -44,8 +44,20 @@ function open_requester_dialog(player, entityId)
   btnResource.elem_value = strToSignalId(requester.resourceName)
   btnNetwork.elem_value = strToSignalId(requester.networkName)
 
+  dialog.add{ type = "label", caption = {"caption.requester-stop"}, style= "caption_label" }
+
+  local stops = find_stops_near(requester.entity)
+
+  if #stops == 0 then
+      dialog.add{ type = "label", style = "tm-error-text", caption = {"message.requester-no-stop-nearby"},
+                  tooltip = {"error.noStopFound"},}
+  else
+    dialog.add{ type = "label", caption = stops[1].backer_name }
+  end
+
   local ctrl = requester.entity.get_control_behavior()
-  if not ctrl.get_circuit_network(defines.wire_type.red) and not ctrl.get_circuit_network(defines.wire_type.green) then
+  if #stops > 0 and not ctrl.get_circuit_network(defines.wire_type.red)
+         and not ctrl.get_circuit_network(defines.wire_type.green) then
     dialog.add{ type = "label", style = "tm-error-text", caption = {"message.requester-not-connected"},
                 tooltip = {"tooltip.requester-not-connected"},}
   end

@@ -1,4 +1,18 @@
 ---------------------------------------------------------------------------------------------------
+Version 1.0.7
+Date: 2021-04-13
+  New features:
+    - Added train stop name to requester dialog.
+    - Improved warning messages in requester dialog when the requester is
+      not near a CTM train stop or has no logic wire connected.
+  Bugfix:
+    - Ensure requester dialog is not shown when opening an ordinary lamp.
+---------------------------------------------------------------------------------------------------
+Version 1.0.6
+Date: 2021-04-08
+  Bugfix:
+    - Fixed another exception when trying to schedule to a requester that has no stop.
+---------------------------------------------------------------------------------------------------
 Version 1.0.5
 Date: 2021-04-08
   New feature:
