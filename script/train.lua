@@ -93,24 +93,27 @@ end
 
 
 --
--- Get the total fuel value of a locomotive.
+-- Test if a locomotive needs fuel.
 --
 -- @param loco The locomotive to check
--- @return the total fuel value of the locomotive
+-- @param minFuel The minimum fuel that a locomotive must have
+-- @return True if the locomotive needs fuel
 --
-local function locomotive_fuel_value(loco, minFuel)
+local function locomotive_needs_fuel(loco, minFuel)
   local fuelInv = loco.get_fuel_inventory()
   if not fuelInv then return false end
 
   local contents = fuelInv.get_contents()
   local fuelSum = 0;
+  local numFuelItems = 0;
 
   for name,count in pairs(contents) do
     local fuelItem = game.item_prototypes[name]
     fuelSum = fuelSum + fuelItem.fuel_value * count
+    numFuelItems = numFuelItems + count
   end
 
-  return fuelSum
+  return fuelSum < minFuel or numFuelItems <= 2
 end
 
 
@@ -123,7 +126,7 @@ end
 -- 
 local function locomotives_need_fuel(locos, minFuel)
 	for _,loc in pairs(locos) do
-		if locomotive_fuel_value(loc) < minFuel then
+		if locomotive_needs_fuel(loc, minFuel) then
 			return true
 		end
 	end
@@ -205,8 +208,8 @@ function train_schedule_delivery(train, stationName)
 
   local rec = {station = stationName, wait_conditions = {
     {type = "empty", compare_type = "or"},
-    {type = "inactivity", compare_type = "or", ticks = 300},
-    {type = "time", compare_type = "or", ticks = 7200} -- 2min
+    {type = "inactivity", compare_type = "or", ticks = 300}, -- 5 sec
+    {type = "time", compare_type = "or", ticks = settings.global['deliveryTimeout'].value * 48}
   }}
 
   schedule.current = (schedule.current or 0) + 1
@@ -257,6 +260,25 @@ function train_schedule_remove_station(train, stationName)
     end
   end
   return false
+end
+
+
+--
+-- Cleanup the train's schedule: remove all entries after the current one.
+--
+-- @param train The LuaTrain to modify
+--
+function train_schedule_remove_all_after_current(train)
+  if train.valid and train.schedule then
+    local current = train.schedule.current
+    local recs = train.schedule.records
+    if current and #recs > current then
+      while #recs > current do
+        table.remove(recs, #recs)
+      end
+      train_set_schedule(train, { records = recs, current = current })
+    end
+  end
 end
 
 

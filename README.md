@@ -1,7 +1,7 @@
 # Overview
 
 This mod allows to create train networks like those of the logistic bots with providers and
-requesters. The images above should give you some hints how the mod works.
+requesters. The images in the doc folder should give you some hints how the mod works.
 
 # Provider Station
 
@@ -13,7 +13,7 @@ loading stop and to an empty circuit condition on the cargo train manager stop.
 
 A requester station has a cargo train manager stop, and one or more requester lamps.
 The requester lamps needs to be connected to the constant combinator that is part of the
-cargo train manager stop. Please have a look at the example image that shows an example wiring.
+cargo train manager stop.
 
 # Train Networks
 

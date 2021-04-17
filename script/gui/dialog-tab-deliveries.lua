@@ -23,7 +23,9 @@ function update_dialog_tab_deliveries(parent, player)
   local signal, sprite, stop
   local now = game.tick
 
+  local idx = 0
   for trainId,delivery in pairs(global.deliveries) do
+    idx = idx + 1
     local requester = delivery.requester
     signal = strToSignalId(requester.resourceName)
     if signal then
@@ -62,7 +64,7 @@ function update_dialog_tab_deliveries(parent, player)
     local locomotive = main_locomotive(delivery.train)
     if locomotive and locomotive.surface.index == playerSurfaceId then
       table.add{type = "sprite-button", sprite = "utility/center", style = "tool_button", tooltip = {"tooltip.show-on-map"},
-                name = BTN_SHOW_TRAIN_PREFIX..trainId}
+                name = BTN_SHOW_TRAIN_PREFIX..trainId..":"..idx}
     else
       table.add{type = "empty-widget"}
     end

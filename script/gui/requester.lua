@@ -12,6 +12,19 @@ mod_gui = require("mod-gui")
 function close_requester_dialog(player)
   local dialog = player.gui.relative[REQUESTER_DIALOG_NAME]
   if dialog then
+    dialog.visible = false
+  end
+end
+
+
+--
+-- Destroy the requester dialog for a player.
+--
+-- @param player The player to destroy the dialog for
+--
+function destroy_requester_dialog(player)
+  local dialog = player.gui.relative[REQUESTER_DIALOG_NAME]
+  if dialog then
     dialog.destroy()
   end
 end

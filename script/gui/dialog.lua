@@ -76,10 +76,10 @@ end
 function open_dialog(player)
   local dialog = player.gui.screen[DIALOG_NAME]
 
---  if dialog then
---    dialog.destroy()
---    dialog = nil
---  end
+  if dialog then
+    dialog.destroy()
+    dialog = nil
+  end
 
   if dialog == nil then 
     dialog = player.gui.screen.add{type = "frame", name = DIALOG_NAME, direction = "vertical",
@@ -104,10 +104,13 @@ function open_dialog(player)
     tabbedPane.add_tab(tabbedPane.add{type = "tab", name = "requester", caption = {"caption.dialog-tab-requester"}}, contents)
 
     contents = tabbedPane.add{type = "scroll-pane", horizontal_scroll_policy = "never" }
+    tabbedPane.add_tab(tabbedPane.add{type = "tab", name = "pending", caption = {"caption.dialog-tab-pending"}}, contents)
+
+    contents = tabbedPane.add{type = "scroll-pane", horizontal_scroll_policy = "never" }
     tabbedPane.add_tab(tabbedPane.add{type = "tab", name = "deliveries", caption = {"caption.dialog-tab-deliveries"}}, contents)
 
     contents = tabbedPane.add{type = "scroll-pane", horizontal_scroll_policy = "never" }
-    tabbedPane.add_tab(tabbedPane.add{type = "tab", name = "pending", caption = {"caption.dialog-tab-pending"}}, contents)
+    tabbedPane.add_tab(tabbedPane.add{type = "tab", name = "failed", caption = {"caption.dialog-tab-failed"}}, contents)
   end
 
   dialog_tab_changed(player.index, dialog["tm-dialog-pane"])
@@ -137,6 +140,8 @@ function dialog_tab_changed(playerId, element)
       update_dialog_tab_pending(tabAndContent.content, player)
     elseif tabAndContent.tab.name == "deliveries" then
       update_dialog_tab_deliveries(tabAndContent.content, player)
+    elseif tabAndContent.tab.name == "failed" then
+      update_dialog_tab_failed(tabAndContent.content, player)
     end
   end
 end

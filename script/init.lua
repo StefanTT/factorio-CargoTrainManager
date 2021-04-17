@@ -58,6 +58,14 @@ local function initGlobalVariables()
   --   train The LuaTrain doing the delivery
   global.deliveries = global.deliveries or {}
 
+  -- The failed deliveries.
+  -- A list of structures with:
+  --   requester The requester at the destination of the delivery, may be invalid
+  --   time The game time of the failure
+  --   train The LuaTrain doing the delivery, may be invalid
+  --   message The failure message
+  global.failedDeliveries = global.failedDeliveries or {}
+
   -- Dialog private data per player.
   -- Key is the player number, value depends on the currently opened dialog.
   global.dialogData = global.dialogData or {}

@@ -1,4 +1,23 @@
 ---------------------------------------------------------------------------------------------------
+Version 1.0.9
+Date: 2021-04-17
+  Changes:
+    - Train unload timeout is now set to 80% of the delivery time instead of a fixed time.
+  Bugfix:
+    - Handle case when the delivering train arrives at the wrong CTM train station.
+    - Set correct next station of a train when a delivery is aborted.
+---------------------------------------------------------------------------------------------------
+Version 1.0.8
+Date: 2021-04-13
+  New features:
+    - Added tab for failed deliveries to management console. This tab shows the failed deliveries of the
+      last 15 minutes.
+    - It is now reported when a train tries to deliver to the wrong station in case of duplicate station names.
+    - Improved chat messages of failed deliveries - train and target station are now clickable
+    - The delivering train's schedule is cleaned when it arrives at a provider station.
+  Bugfix:
+    - Smarter handling of requester dialog to avoid flickering when a requester is opened.
+---------------------------------------------------------------------------------------------------
 Version 1.0.7
 Date: 2021-04-13
   New features:

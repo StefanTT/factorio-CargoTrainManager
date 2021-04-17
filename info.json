@@ -1,7 +1,7 @@
 {
   "name": "CargoTrainManager",
   "title": "Cargo Train Manager",
-  "version": "1.0.7",
+  "version": "1.0.9",
   "factorio_version": "1.1",
   "author": "Stefan T",
   "description": "Manages automated cargo transport via train.",

@@ -183,6 +183,8 @@ function dispatcher_train_waiting_station(train)
   local stop = global.stops[train.station.unit_number]
   if not stop then return end
 
+  train_schedule_remove_all_after_current(train)
+
   if stop.numRequesters == 0 and not stop.resourceName then
     local cargo = train_cargo(train)
     if cargo then
@@ -280,12 +282,13 @@ function dispatcher_request_delivery(requester)
     end
   end
 
-  log("no train ready for delivery of "..resource.resourceName.." to "..global.stops[requester.stopId].entity.backer_name..", waiting")
   for i,req in pairs(resource.pending) do
     if req.entityId == requester.entityId then
       return
     end
   end
+
+  log("no train ready for delivery of "..resource.resourceName.." to "..global.stops[requester.stopId].entity.backer_name..", waiting")
   table.insert(resource.pending, requester)
 end
 
@@ -296,7 +299,17 @@ end
 -- @param requester The requester to handle
 --
 function dispatcher_cancel_delivery(requester)
-  log("canceling delivery for requester #"..requester.entityId)
+  log("canceling delivery for requester #"..requester.entityId..": "..tostring(requester.resourceName))
+  dispatcher_remove_delivery_request(requester)
+end
+
+
+--
+-- Remove a delivery request of a requester.
+--
+-- @param requester The requester to handle
+--
+function dispatcher_remove_delivery_request(requester)
   requester.trainRequested = false
 
   local id = dispatcher_id(requester)
@@ -319,24 +332,34 @@ end
 -- Abort an ongoing delivery.
 --
 -- @param delivery The delivery to abort
--- @param messageId The message to print to the owning force
+-- @param message The message to print to the owning force
+-- @param failedMessage The message to add to the list of failed deliveries (optional)
 --
-function dispatcher_abort_delivery(delivery, messageId)
+function dispatcher_abort_delivery(delivery, message, failedMessage)
   local stop = global.stops[delivery.requester.stopId]
   local train = delivery.train
 
-  if stop then
-    log("Aborting delivery to "..stop.entity.backer_name..", reason: "..tostring(messageId))
+  local stopName = "<unknown>"
+  if stop and stop.entity.valid then stopName = stop.entity.backer_name end
 
-    if messageId then
-      printmsg({messageId, stop.entity.backer_name}, stop.entity.force)
+  if message and type(message) ~= "table" then
+    message = {message, stopName}
+  end
+
+  if stop then
+    log("Aborting delivery to "..stopName..", reason: "..tostring(message))
+
+    if message then
+      printmsg(message, stop.entity.force)
     end
 
     if train.valid then
-      if train_schedule_remove_station(train, stop.entity.backer_name) then
+      if not train_schedule_remove_station(train, stopName) then
         train_schedule_next(train)
       end
     end
+  else
+    log("Aborting delivery to <not existing stop>, reason: "..tostring(messageId))
   end
 
   if delivery.requester then
@@ -345,12 +368,37 @@ function dispatcher_abort_delivery(delivery, messageId)
 
   global.deliveries[train.id] = nil
 
+  table.insert(global.failedDeliveries, 1, {
+    requester = delivery.requester,
+    time = game.tick,
+    train = delivery.train,
+    message = failedMessage or message
+  })
+
   if stop then
     stop.deliveringTrains[train.id] = nil
     dispatcher_update_stop_status(stop)
   end
 
   dispatcher_handle_requesters()
+end
+
+
+--
+-- The delivery failed because the target stop is/was not the correct one.
+--
+-- @param train The LuaTrain that did the delivery
+-- @param stop The wrong stop
+--
+function dispatcher_delivery_failed_wrong_stop(train, stop)
+  log("Delivery failed due to duplicate stop names: "..stop.backer_name)
+
+  local delivery = global.deliveries[train.id]
+  if delivery then
+    dispatcher_abort_delivery(delivery,
+      {"message.delivery-failed-wrong-station", stationRef(stop)},
+      {"message.delivery-failed-wrong-station-short"})
+  end
 end
 
 
@@ -381,7 +429,7 @@ function dispatcher_handle_requesters()
         end
       else
         if requester.trainRequested then
-          dispatcher_cancel_delivery(requester)
+          dispatcher_remove_delivery_request(requester)
         end
       end
     end
@@ -390,7 +438,7 @@ end
 
 
 --
--- Handle delivery timeouts.
+-- Handle delivery timeouts and cleanup the list of failed deliveries.
 -- Called every couple of seconds.
 --
 function dispatcher_handle_deliveries()
@@ -401,7 +449,20 @@ function dispatcher_handle_deliveries()
 
   for trainId,delivery in pairs(global.deliveries) do
     if delivery.startTime < timeoutTime then
-      dispatcher_abort_delivery(delivery, "message.delivery-timeout")
+      local stop = global.stops[delivery.requester.stopId]
+      local stopRef
+      if stop then stopRef = stationRef(stop.entity) else stopRef = "<unknown>" end
+      dispatcher_abort_delivery(delivery,
+        {"message.delivery-timeout", trainRef(delivery.train) or "<unknown>", stopRef},
+        {"message.delivery-timeout-short"})
+    end
+  end
+
+  if #global.failedDeliveries > 0 then
+    -- remove failed deliveries that are older than 15 minutes
+    local minTick = game.tick - 54000
+    while #global.failedDeliveries > 0 and (global.failedDeliveries[#global.failedDeliveries].time or 0) < minTick do
+      table.remove(global.failedDeliveries, #global.failedDeliveries)
     end
   end
 end

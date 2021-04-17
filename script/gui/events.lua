@@ -25,7 +25,8 @@ function onGuiClick(event)
     local parts = str_split(name, ":")
     player_zoom_to_world(event.player_index, tonumber(parts[2]), tonumber(parts[3]))
   elseif string.find(name, BTN_SHOW_TRAIN_PREFIX) then
-    player_open_map_at_train(event.player_index, tonumber(string.sub(name, string.len(BTN_SHOW_TRAIN_PREFIX) + 1)))
+    local parts = str_split(name, ":")
+    player_open_map_at_train(event.player_index, tonumber(parts[2]))
   elseif string.find(name, BTN_RESOURCE_DETAILS_PREFIX) then
     open_resource_details_dialog(string.sub(name, string.len(BTN_RESOURCE_DETAILS_PREFIX) + 1), game.players[event.player_index])
   elseif string.find(name, BTN_RESOURCE_DOWN_PREFIX) then
@@ -84,6 +85,8 @@ function onGuiOpened(event)
         open_stop_dialog(player, event.entity.unit_number)
       elseif event.entity.type == REQUESTER_TYPE and event.entity.name == CTM_REQUESTER then
         open_requester_dialog(player, event.entity.unit_number)
+      elseif event.entity.type == "lamp" then
+        destroy_requester_dialog(player)
       end
     end
   end

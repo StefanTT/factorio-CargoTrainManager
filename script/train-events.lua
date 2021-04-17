@@ -29,10 +29,13 @@ local function trainLeavesStation(train)
   log("train "..train_name(train).." left station "..station.backer_name)
 
   local stop = global.stops[station.unit_number]
+  local checkWrongStation = true
+
   if stop then
     -- train left a TrainManager stop
     if stop.deliveringTrains[train.id] then
       dispatcher_train_delivery_done(train, stop)
+      checkWrongStation = false
     else
       dispatcher_update_stop_status(stop)
     end
@@ -40,6 +43,15 @@ local function trainLeavesStation(train)
     -- train left a refuel station
     log("removing refuel station from train "..train_name(train))
     train_schedule_remove_station(train, station.backer_name)
+    checkWrongStation = false
+  end
+  
+  if checkWrongStation and global.deliveries[train.id] then
+    -- train left some other station: ensure the delivery did not fail due to duplicate names
+    local requesterStop = get_stop_of_requester(global.deliveries[train.id].requester)
+    if requesterStop and requesterStop.backer_name == station.backer_name then
+      dispatcher_delivery_failed_wrong_stop(train, station)
+    end
   end
 
   if train_needs_fuel(train) then
