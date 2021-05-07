@@ -1,4 +1,16 @@
 ---------------------------------------------------------------------------------------------------
+Version 1.1.1
+Date: 2021-05-07
+  Changes:
+    - it looks like current Factorio (1.1.33) sometimes does not properly handle when a train
+      arrives at a station. This version works around this behavior to detect trains that wait
+      at a provider station without starting the delivery (the station's lamp is not green too)
+---------------------------------------------------------------------------------------------------
+Version 1.1.0
+Date: 2021-05-02
+  Bugfix:
+    - Fix crash when two or more deliveries time out at the same time.
+---------------------------------------------------------------------------------------------------
 Version 1.0.9
 Date: 2021-04-17
   Changes:

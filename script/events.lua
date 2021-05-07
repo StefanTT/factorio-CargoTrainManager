@@ -115,5 +115,6 @@ function registerEvents()
   script.on_nth_tick(nil)
   script.on_nth_tick(113, dispatcher_handle_requesters)
   script.on_nth_tick(307, dispatcher_handle_deliveries)
+  script.on_nth_tick(1893, dispatcher_validate_station_status)
 end
 

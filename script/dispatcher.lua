@@ -197,7 +197,7 @@ function dispatcher_train_waiting_station(train)
   log("stop "..stop.entity.backer_name.." is ready for delivery")
 
   local resource = get_or_create_resource(stop)
-  if #resource.pending > 0 and dispatcher_train_schedule_delivery(stop, resource.pending[1]) then
+  if #resource.pending > 0 and dispatcher_train_schedule_delivery(stop, resource.pending[1], train) then
     table.remove(resource.pending, 1)
   else
     dispatcher_update_stop_status(stop)
@@ -210,10 +210,11 @@ end
 --
 -- @param stop The stop from where the train to send
 -- @param requester The target requester
+-- @param train The train at the stop (optional)
 -- @return True if the train is being sent, false if there was no train
 --
-function dispatcher_train_schedule_delivery(stop, requester)
-  local train = stop.entity.get_stopped_train()
+function dispatcher_train_schedule_delivery(stop, requester, train)
+  train = train or stop.entity.get_stopped_train()
   if not train then
     log("WARN no train found to deliver at stop "..stop.entity.backer_name)
     stop.canDeliver = false
@@ -446,16 +447,22 @@ function dispatcher_handle_deliveries()
 
   local timeout = settings.global['deliveryTimeout'].value * 60
   local timeoutTime = game.tick - timeout
+  local overdue = {}
 
-  for trainId,delivery in pairs(global.deliveries) do
+  for _,delivery in pairs(global.deliveries) do
     if delivery.startTime < timeoutTime then
-      local stop = global.stops[delivery.requester.stopId]
-      local stopRef
-      if stop then stopRef = stationRef(stop.entity) else stopRef = "<unknown>" end
-      dispatcher_abort_delivery(delivery,
-        {"message.delivery-timeout", trainRef(delivery.train) or "<unknown>", stopRef},
-        {"message.delivery-timeout-short"})
+      table.insert(overdue, delivery)
     end
+  end
+
+  for _,delivery in pairs(overdue) do
+    local stop = global.stops[delivery.requester.stopId]
+    local stopRef
+    if stop then stopRef = stationRef(stop.entity) else stopRef = "<unknown>" end
+
+    dispatcher_abort_delivery(delivery,
+      {"message.delivery-timeout", trainRef(delivery.train) or "<unknown>", stopRef},
+      {"message.delivery-timeout-short"})
   end
 
   if #global.failedDeliveries > 0 then
@@ -463,6 +470,25 @@ function dispatcher_handle_deliveries()
     local minTick = game.tick - 54000
     while #global.failedDeliveries > 0 and (global.failedDeliveries[#global.failedDeliveries].time or 0) < minTick do
       table.remove(global.failedDeliveries, #global.failedDeliveries)
+    end
+  end
+end
+
+
+--
+-- Go through all trains and for those that wait at a provider station ensure that they
+-- are properly registered as providing the good. This method should not be required but
+-- at the time of writing it sometimes happens that a train waits at a provider station
+-- and the mod did not notice it's arrival.
+--
+function dispatcher_validate_station_status()
+  for _,stop in pairs(global.stops) do
+    if not stop.canDeliver and stop.entity.valid then
+      local train = stop.entity.get_stopped_train()
+      if train then
+        log("WARN station "..stop.entity.backer_name.." has a waiting train that could deliver, fixing stop status")
+        dispatcher_train_waiting_station(train)
+      end
     end
   end
 end

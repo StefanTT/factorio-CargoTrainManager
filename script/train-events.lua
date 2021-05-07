@@ -8,11 +8,14 @@
 -- @param train The train
 --
 local function trainArrivedAtStation(train)
-  if not train.station or not train.station.valid then return end
+  if not train.station or not train.station.valid then
+    log("train "..train_name(train).." arrived at an invalid/unkown station")
+    return
+  end
   log("train "..train_name(train).." arrived at station "..train.station.backer_name)
 
   if dispatcher_shall_handle_train(train) then
-    dispatcher_train_waiting_station(train, stop)
+    dispatcher_train_waiting_station(train)
   end
 end
 
